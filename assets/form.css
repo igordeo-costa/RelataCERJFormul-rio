@@ -75,6 +75,17 @@
     line-height: 1.4;
 }
 
+#relatacerj-guias-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+#relatacerj-guias-wrapper input.relatacerj-guia {
+    width: 100%;
+}
+
+
 
 
 

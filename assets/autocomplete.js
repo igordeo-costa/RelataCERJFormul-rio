@@ -1,35 +1,38 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const input = document.querySelector('input[name="guia"]');
-    if (!input) return;
+document.addEventListener('DOMContentLoaded', function () {
+    const wrapper = document.getElementById('relatacerj-guias-wrapper');
+    const addBtn = document.getElementById('relatacerj-add-guia');
 
-    let lista;
+    if (!wrapper || !addBtn) return;
 
-    input.addEventListener('input', async () => {
-        const termo = input.value;
-        if (termo.length < 2) return;
+    function initAutocomplete(input) {
+        if (typeof jQuery === 'undefined' || !jQuery.ui) return;
 
-        const res = await fetch(
-            `${relatacerj.ajax_url}?action=relatacerj_buscar_guias&term=${encodeURIComponent(termo)}`
-        );
+       jQuery(input).autocomplete({
+    minLength: 2,
+    appendTo: input.parentElement,
+    source: function(request, response) {
+        jQuery.getJSON(relatacerj_ajax_object.ajax_url, {
+            action: 'relatacerj_buscar_guias',
+            term: request.term
+        }, response);
+    }
+});
 
-        const dados = await res.json();
+    }
 
-        if (lista) lista.remove();
+    // Inicializa autocomplete nos inputs já existentes
+    wrapper.querySelectorAll('input.relatacerj-guia').forEach(initAutocomplete);
 
-        lista = document.createElement('ul');
-        lista.className = 'relatacerj-autocomplete';
+    // Adiciona novo input com autocomplete
+    addBtn.addEventListener('click', function () {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'guias[]';
+        input.className = 'relatacerj-guia';
+        input.required = true;
 
-        dados.forEach(nome => {
-            const item = document.createElement('li');
-            item.textContent = nome;
-            item.onclick = () => {
-                input.value = nome;
-                lista.remove();
-            };
-            lista.appendChild(item);
-        });
-
-        input.parentNode.appendChild(lista);
+        wrapper.appendChild(input);
+        initAutocomplete(input);
     });
 });
 

@@ -7,31 +7,39 @@
 
 defined('ABSPATH') || exit;
 
+// Inclui os arquivos de funcionalidades
 require_once plugin_dir_path(__FILE__) . 'includes/relato_excursao.php';
 require_once plugin_dir_path(__FILE__) . 'includes/handler.php';
 
-add_action('wp_enqueue_scripts', function () {
+/**
+ * Enfileira CSS e JS do plugin
+ */
+function relatacerj_enqueue_scripts() {
+    // CSS do formulário
     wp_enqueue_style(
         'relatacerj-form-style',
         plugin_dir_url(__FILE__) . 'assets/form.css',
         [],
-        '1.0'
+        filemtime(plugin_dir_path(__FILE__) . 'assets/form.css')
     );
-});
 
-add_action('wp_enqueue_scripts', function () {
+    // jQuery UI Autocomplete (necessário para o autocomplete)
+    wp_enqueue_script('jquery-ui-autocomplete');
+
+    // JS de autocomplete
     wp_enqueue_script(
         'relatacerj-autocomplete',
         plugin_dir_url(__FILE__) . 'assets/autocomplete.js',
-        [],
-        null,
+        ['jquery', 'jquery-ui-autocomplete'],
+        filemtime(plugin_dir_path(__FILE__) . 'assets/autocomplete.js'),
         true
     );
 
-    wp_localize_script('relatacerj-autocomplete', 'relatacerj', [
+    // Passa a URL do AJAX para o JS
+    wp_localize_script('relatacerj-autocomplete', 'relatacerj_ajax_object', [
         'ajax_url' => admin_url('admin-ajax.php')
     ]);
-});
 
-
+}
+add_action('wp_enqueue_scripts', 'relatacerj_enqueue_scripts');
 

@@ -8,22 +8,27 @@ function relatacerj_shortcode_formulario() {
         <?php wp_nonce_field('relatacerj_salvar', 'relatacerj_nonce'); ?>
 
         <h2>Relato de Excursão</h2>
-
+	<div class="relatacerj-field">
+        <label>Excursão</label>
+        <p class="relatacerj-help">
+        Nome oficial da excursão realizada. Dica! Use nomes descritivos: "Caminhada Horto x Paineiras"; "Invasão na Face Norte do Morro da Urca". Evite nomes genéricos: "Prancheta de caminhada." 
+         </p>
+         <input type="text" name="excursao" required>
+         </div>
+        
         <div class="relatacerj-field">
-            <label>Guia</label>
-            <p class="relatacerj-help">
-                Nome do guia responsável pela excursão.
-            </p>
-            <input type="text" name="guia" required>
-        </div>
+    	<label>Guia(s)</label>
 
-        <div class="relatacerj-field">
-            <label>Demais Guias</label>
-            <p class="relatacerj-help">
-                Preencha em caso de haver mais de um guia responsável pela atividade.
-            </p>
-            <input type="text" name="demais_guias">
-        </div>
+    	<div id="relatacerj-guias-wrapper">
+        <input type="text" name="guias[]" class="relatacerj-guia" required>
+    	</div>
+    	<button type="button" id="relatacerj-add-guia">
+        	+ Guias
+    	</button>
+    	<p class="relatacerj-help">
+        Informe o guia responsável pela atividade. Use o botão <strong>+ Guias</strong> para adicionar outros em caso de responsabilidade compartilhada.
+    	</p>
+	</div>
 
         <div class="relatacerj-field">
             <label>Auxiliar(es)</label>
@@ -31,14 +36,6 @@ function relatacerj_shortcode_formulario() {
                 Informe os auxiliares que atuaram na atividade, se houver.
             </p>
             <input type="text" name="guias_auxiliares">
-        </div>
-
-        <div class="relatacerj-field">
-            <label>Excursão</label>
-            <p class="relatacerj-help">
-                Nome oficial da excursão realizada.
-            </p>
-            <input type="text" name="excursao" required>
         </div>
 
         <div class="relatacerj-field">
