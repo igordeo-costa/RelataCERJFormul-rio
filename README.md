@@ -1,66 +1,112 @@
 # RelataCERJ – Formulário de Relato de Excursões
 
-Plugin WordPress para registro padronizado de **relatos de excursões do Centro Excursionista Rio de Janeiro**, desenvolvido para uso institucional do clube, com foco em clareza, consistência dos dados e compatibilidade mobile.
+Plugin WordPress desenvolvido para o **Centro Excursionista Rio de Janeiro (CERJ)** com o objetivo de padronizar, organizar e facilitar o registro de relatos de excursões realizadas pelo clube.
 
-## 📌 Visão Geral
+O plugin disponibiliza um formulário público, acessível via shortcode, focado em **consistência dos dados, usabilidade e compatibilidade mobile**, permitindo posterior análise, arquivamento e geração de relatórios.
 
-O **RelataCERJ** disponibiliza um formulário público via shortcode, permitindo que guias registrem informações completas sobre excursões realizadas, incluindo dados operacionais, participantes, condições climáticas e observações relevantes.
+---
 
-Os dados são tratados de forma normalizada, possibilitando exportação posterior (ex.: CSV) para análise, arquivo ou relatórios.
+## 📖 Visão Geral
+
+O **RelataCERJ** permite que guias e responsáveis técnicos registrem informações completas sobre excursões, incluindo:
+
+- Dados gerais da atividade
+- Participantes
+- Condições ambientais e climáticas
+- Horários e logística
+- Observações técnicas relevantes
+
+Os dados enviados são tratados e normalizados, possibilitando exportação em formato **CSV** para uso administrativo ou técnico.
+
+---
 
 ## ✨ Funcionalidades
 
-- Shortcode `[relato_excursao]` para exibição do formulário
-- Campos estruturados e documentados para facilitar o preenchimento
-- Lista suspensa para **Categoria de Atividade**
-- Interface responsiva (desktop e mobile)
-- Segurança com `wp_nonce_field`
-- Arquitetura simples e extensível
+- 📄 Formulário público via shortcode `[relato_excursao]`
+- 🧭 Campos estruturados e padronizados
+- 📋 Lista suspensa para **Categoria de Atividade**
+- 📱 Interface responsiva (desktop e mobile)
+- 🔐 Proteção contra envios indevidos com `wp_nonce_field`
+- 🧩 Código simples, organizado e fácil de estender
+- 📤 Exportação dos dados em arquivo CSV
+
+---
 
 ## 🧩 Estrutura do Plugin
 
-```
+```text
 relatacerj-formulario/
-├── relatacerj-formulario.php   # Arquivo principal do plugin
-└── includes/
-    └── handler.php             # Processamento e normalização dos dados
+├── assets/
+│   ├── autocomplete.js          # Script de apoio para preenchimento automático
+│   └── form.css                 # Script com a estética
+│
+├── includes/
+│   ├── handler.php              # Validação, processamento e normalização dos dados
+│   └── relato.excursao.php      # Estrutura e renderização do formulário
+│
+├── relatacerj-formulario.php    # Arquivo principal do plugin
+└── README.md                    # Documentação do projeto
 ```
+
+---
 
 ## 🔧 Instalação
 
-1. Copie a pasta do plugin para:
+1. Copie a pasta do plugin para o diretório:
    ```
    wp-content/plugins/relatacerj-formulario/
    ```
-2. Ative o plugin no painel administrativo do WordPress
-3. Crie uma página e insira o shortcode:
+2. Acesse o painel administrativo do WordPress
+3. Ative o plugin em **Plugins → Plugins Instalados**
+4. Crie ou edite uma página e insira o shortcode:
    ```
    [relato_excursao]
    ```
+
+---
 
 ## 🚀 Uso
 
 Após inserir o shortcode, o formulário será exibido automaticamente na página.
 
-O arquivo `handler.php` é responsável por:
-- Validar o envio
+O processamento dos dados é realizado pelos arquivos em `includes/`, responsáveis por:
+
+- Renderizar o formulário
+- Validar o envio dos dados
 - Normalizar datas e horários
-- Preparar os dados para armazenamento ou exportação
-- O arquivo CSV é salvo em:
+- Preparar os dados para armazenamento
+- Gerar o arquivo CSV
+
+📂 O arquivo CSV é salvo em:
 ```
 wp-content/uploads/
 ```
 
+---
+
 ## 🛠️ Requisitos
 
-- WordPress 6.x ou superior
-- PHP 8.0 ou superior
+- WordPress **6.x** ou superior  
+- PHP **8.0** ou superior  
+
+---
+
+## 🔒 Segurança
+
+O plugin utiliza mecanismos nativos do WordPress para segurança, incluindo:
+
+- Verificação de nonce (`wp_nonce_field`)
+- Sanitização básica dos dados enviados
+
+---
 
 ## 📄 Licença
 
-Este projeto é de uso interno/institucional. Todos que forem reproduzir devem uma cerveja artesanal para o Autor do projeto.
+Projeto de uso **interno e institucional** do Centro Excursionista Rio de Janeiro. Qualquer reprodução não autorizada implica no pagamento obrigatório de **uma cerveja artesanal ao autor do projeto**. 🍺
+
+---
 
 ## 👤 Autor
 
 **Igor de Oliveira Costa**  
-Auxiliar da Diretoria Técnica do CERJ, biênio 2026-2028.
+Auxiliar da Diretoria Técnica do CERJ Biênio **2026–2028**
