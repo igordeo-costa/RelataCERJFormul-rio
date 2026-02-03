@@ -18,7 +18,7 @@ function relatacerj_lista_guias() {
         'Livia Cardoso',
         'Luiz Puppin',
         'Marcelo Magal',
-        'Mariana Lopes',
+        'Mariana Santos',
         'Mariozinho Richard',
         'Miriam Gerber',
         'Pedro Bugim',
@@ -42,6 +42,34 @@ function relatacerj_buscar_guias() {
 
     $resultados = array_filter($guias, function ($guia) use ($term) {
         return stripos($guia, $term) !== false;
+    });
+
+    wp_send_json(array_values($resultados));
+}
+
+function relatacerj_lista_participantes() {
+    return [
+        'Yerecê Pereira',
+        'Waldir Júnior',
+        'Igor Costa',
+        'Thailli Conte',
+        'Tiago Magaldi',
+        // ... 200+
+    ];
+}
+
+/**
+ * AJAX para buscar participantes (autocomplete)
+ */
+add_action('wp_ajax_relatacerj_buscar_participantes', 'relatacerj_buscar_participantes');
+add_action('wp_ajax_nopriv_relatacerj_buscar_participantes', 'relatacerj_buscar_participantes');
+
+function relatacerj_buscar_participantes() {
+    $term = sanitize_text_field($_GET['term'] ?? '');
+    $participantes = relatacerj_lista_participantes();
+
+    $resultados = array_filter($participantes, function ($participante) use ($term) {
+        return stripos($participante, $term) !== false;
     });
 
     wp_send_json(array_values($resultados));
@@ -81,6 +109,21 @@ function relatacerj_processar_formulario() {
     ) {
         return;
     }
+    
+    // 2. Lista de campos obrigatórios
+    $campos_obrigatorios = [
+        'excursao',
+        'guias',
+        'local',
+        'categoria',
+        'data_inicio',
+        'hora_inicio',
+        'hora_fim',
+        'condicoes_climaticas',
+        'participantes',
+        'relato',
+        'preenchido_por',
+    ];
 
     // PROCESSA os guias
     $guias_array = $_POST['guias'] ?? [];
@@ -98,6 +141,67 @@ function relatacerj_processar_formulario() {
         return;
     }
 
+$erros = [];
+
+// Processa os PARTICIPANTES
+setlocale(LC_COLLATE, 'pt_BR.UTF-8', 'pt_BR', 'Portuguese_Brazil');
+
+$participantes_array = $_POST['participantes'] ?? [];
+
+// Garante que é array
+if (!is_array($participantes_array)) {
+    $participantes_array = [];
+}
+
+// Sanitiza e remove vazios
+$participantes_array = array_map('sanitize_text_field', $participantes_array);
+$participantes_array = array_filter($participantes_array);
+
+// Valida contra lista fechada
+$lista_valida = relatacerj_lista_participantes();
+$participantes_array = array_filter(
+    $participantes_array,
+    fn ($p) => in_array($p, $lista_valida, true)
+);
+
+// Remove duplicados
+$participantes_array = array_unique($participantes_array);
+
+// Validação final
+if (empty($participantes_array)) {
+    $erros[] = 'Informe ao menos um participante.';
+}
+
+// Ordena alfabeticamente (pt-BR)
+sort($participantes_array, SORT_LOCALE_STRING);
+
+// String final para CSV
+$participantes = implode(', ', $participantes_array);
+
+
+// Garantindo que os campos obrigatórios sejam de fato obrigatórios
+foreach ($campos_obrigatorios as $campo) {
+
+    if ($campo === 'guias') {
+        if (empty($guias_array)) {
+            $erros[] = 'Informe pelo menos um guia responsável.';
+        }
+        continue;
+    }
+
+    if ($campo === 'participantes') {
+        if (empty($participantes_array)) {
+            $erros[] = 'Informe ao menos um participante.';
+        }
+        continue;
+    }
+
+    if (empty($_POST[$campo])) {
+        $erros[] = "O campo {$campo} é obrigatório.";
+    }
+}
+
+
     $guias = implode(', ', $guias_array);
 
     // Monta o array de dados
@@ -112,7 +216,7 @@ function relatacerj_processar_formulario() {
         'hora_inicio'          => relatacerj_normalizar_hora($_POST['hora_inicio'] ?? ''),
         'hora_fim'             => relatacerj_normalizar_hora($_POST['hora_fim'] ?? ''),
         'condicoes_climaticas' => sanitize_text_field($_POST['condicoes_climaticas'] ?? ''),
-        'participantes'        => sanitize_textarea_field($_POST['participantes'] ?? ''),
+        'participantes'        => $participantes,
         'relato'               => sanitize_textarea_field($_POST['relato'] ?? ''),
         'pontos_atencao'       => sanitize_textarea_field($_POST['pontos_atencao'] ?? ''),
         'preenchido_por'       => sanitize_text_field($_POST['preenchido_por'] ?? ''),

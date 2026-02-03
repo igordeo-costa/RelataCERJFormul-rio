@@ -23,7 +23,7 @@ function relatacerj_shortcode_formulario() {
         <input type="text" name="guias[]" class="relatacerj-guia" required>
     	</div>
     	<button type="button" id="relatacerj-add-guia">
-        	+ Guias
+        	Adicionar Guia
     	</button>
     	<p class="relatacerj-help">
         Informe o guia responsável pela atividade. Use o botão <strong>+ Guias</strong> para adicionar outros em caso de responsabilidade compartilhada.
@@ -43,7 +43,7 @@ function relatacerj_shortcode_formulario() {
             <p class="relatacerj-help">
                 Local principal da atividade (país, estado, parque, região, etc).
             </p>
-            <input type="text" name="local">
+            <input type="text" name="local" required>
         </div>
 
         <div class="relatacerj-field">
@@ -77,12 +77,12 @@ function relatacerj_shortcode_formulario() {
         <div class="relatacerj-grid">
             <div class="relatacerj-field">
                 <label>Data de Início</label>
-                <input type="date" name="data_inicio">
+                <input type="date" name="data_inicio" required>
             </div>
 
             <div class="relatacerj-field">
                 <label>Hora de Início</label>
-                <input type="time" name="hora_inicio">
+                <input type="time" name="hora_inicio" required>
             </div>
 
             <div class="relatacerj-field">
@@ -92,7 +92,7 @@ function relatacerj_shortcode_formulario() {
 
             <div class="relatacerj-field">
                 <label>Hora de Término</label>
-                <input type="time" name="hora_fim">
+                <input type="time" name="hora_fim" required>
             </div>
         </div>
 
@@ -101,23 +101,33 @@ function relatacerj_shortcode_formulario() {
             <p class="relatacerj-help">
                 Descreva de forma geral o clima durante a atividade (sol, chuva, vento, neblina, etc).
             </p>
-            <input type="text" name="condicoes_climaticas">
+            <input type="text" name="condicoes_climaticas" required>
         </div>
+	
+	<div class="relatacerj-field">
+    	
+    	<label>Participantes</label>
+    	<div id="relatacerj-participantes-wrapper">
+        	<input
+        	    type="text"
+        	    name="participantes[]"
+        	    class="relatacerj-participante"
+       		    required
+        	>
+    	</div>
+    	<button type="button" id="relatacerj-add-participante">
+        	+ Adicionar participante
+    	</button>
+	</div>
 
-        <div class="relatacerj-field">
-            <label>Participantes</label>
-            <p class="relatacerj-help">
-                Informe os nomes separados por vírgula. Não utilize “e” para separar o último nome.
-            </p>
-            <textarea name="participantes"></textarea>
-        </div>
+
 
         <div class="relatacerj-field">
             <label>Relato de Eventos / Observações</label>
             <p class="relatacerj-help">
                 Descreva acontecimentos relevantes, incidentes, decisões importantes ou observações gerais.
             </p>
-            <textarea name="relato"></textarea>
+            <textarea name="relato" required></textarea>
         </div>
 
         <div class="relatacerj-field">
@@ -133,7 +143,7 @@ function relatacerj_shortcode_formulario() {
             <p class="relatacerj-help">
                 Nome da pessoa responsável pelo preenchimento deste relatório.
             </p>
-            <input type="text" name="preenchido_por">
+            <input type="text" name="preenchido_por" required>
         </div>
 
         <div class="relatacerj-submit">
