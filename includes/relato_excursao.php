@@ -26,7 +26,7 @@ function relatacerj_shortcode_formulario() {
         	Adicionar Guia
     	</button>
     	<p class="relatacerj-help">
-        Informe o guia responsável pela atividade. Use o botão <strong>+ Guias</strong> para adicionar outros em caso de responsabilidade compartilhada.
+        Informe o guia responsável pela atividade. Use o botão Adicionar Guia para adicionar outros em caso de responsabilidade compartilhada.
     	</p>
 	</div>
 
@@ -116,7 +116,7 @@ function relatacerj_shortcode_formulario() {
         	>
     	</div>
     	<button type="button" id="relatacerj-add-participante">
-        	+ Adicionar participante
+        	Adicionar Participante
     	</button>
 	</div>
 

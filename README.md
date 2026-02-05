@@ -44,6 +44,10 @@ relatacerj-formulario/
 │   ├── handler.php              # Validação, processamento e normalização dos dados
 │   └── relato.excursao.php      # Estrutura e renderização do formulário
 │
+├── data/
+│   ├── guias.csv                # lista de guias (fácil troca por banco de dados)
+│   └── participantes.csv        # lista de participantes
+│
 ├── relatacerj-formulario.php    # Arquivo principal do plugin
 └── README.md                    # Documentação do projeto
 ```
@@ -82,6 +86,8 @@ O processamento dos dados é realizado pelos arquivos em `includes/`, responsáv
 wp-content/uploads/
 ```
 
+A lista de guias e participantes garante padronização de nomes e pode ser facilmente trocada de arquivos CSV para um banco de dados mais profissional (como SQL, por exemplo).
+
 ---
 
 ## 🛠️ Requisitos
@@ -109,4 +115,4 @@ Projeto de uso **interno e institucional** do Centro Excursionista Rio de Janeir
 ## 👤 Autor
 
 **Igor de Oliveira Costa**  
-Auxiliar da Diretoria Técnica do CERJ Biênio **2026–2028**
+Auxiliar da Diretoria Técnica do CERJ, biênio **2026–2028**

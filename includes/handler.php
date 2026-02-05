@@ -1,34 +1,8 @@
 <?php
 defined('ABSPATH') || exit;
 
-/**
- * Lista de guias válidos
- */
-function relatacerj_lista_guias() {
-    return [
-        'Alexandre "Xandão" Gomes',
-        'Bruno Waldman',
-        'Caiê Visintin',
-        'Carla Romão',
-        'Daniel Rodriguez',
-        'Henrique Menescal',
-        'Jana Menezes',
-        'Júlio Mello',
-        'Kátia Perensim',
-        'Livia Cardoso',
-        'Luiz Puppin',
-        'Marcelo Magal',
-        'Mariana Santos',
-        'Mariozinho Richard',
-        'Miriam Gerber',
-        'Pedro Bugim',
-        'Thiago Gabriel',
-        'Valéria Aquino',
-        'Fernando "Velho" Fajardo',
-        'Waldecy Lucena',
-        'Zé Kili'
-    ];
-}
+// Busca a lista de guias em data/guias.csv
+require_once plugin_dir_path(__FILE__) . 'guias.php';
 
 /**
  * AJAX para buscar guias (autocomplete)
@@ -47,16 +21,8 @@ function relatacerj_buscar_guias() {
     wp_send_json(array_values($resultados));
 }
 
-function relatacerj_lista_participantes() {
-    return [
-        'Yerecê Pereira',
-        'Waldir Júnior',
-        'Igor Costa',
-        'Thailli Conte',
-        'Tiago Magaldi',
-        // ... 200+
-    ];
-}
+// Busca a lista de participantes em data/participantes.csv
+   require_once plugin_dir_path(__FILE__) . 'participantes.php';
 
 /**
  * AJAX para buscar participantes (autocomplete)

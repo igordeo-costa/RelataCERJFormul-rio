@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', function () {
             input.type = 'text';
             input.name = 'guias[]';
             input.className = 'relatacerj-guia';
-            input.required = true;
 
             guiasWrapper.appendChild(input);
             initGuiasAutocomplete(input);
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', function () {
             input.type = 'text';
             input.name = 'participantes[]';
             input.className = 'relatacerj-participante';
-            input.required = true;
 
             partWrapper.appendChild(input);
             initParticipantesAutocomplete(input);
