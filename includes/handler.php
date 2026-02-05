@@ -1,179 +1,134 @@
 <?php
 defined('ABSPATH') || exit;
 
-// Busca a lista de guias em data/guias.csv
+// ===== LISTAS =====
 require_once plugin_dir_path(__FILE__) . 'guias.php';
+require_once plugin_dir_path(__FILE__) . 'participantes.php';
 
-/**
- * AJAX para buscar guias (autocomplete)
- */
+// ===== AUTOCOMPLETE GUIAS =====
 add_action('wp_ajax_relatacerj_buscar_guias', 'relatacerj_buscar_guias');
 add_action('wp_ajax_nopriv_relatacerj_buscar_guias', 'relatacerj_buscar_guias');
 
 function relatacerj_buscar_guias() {
-    $term = sanitize_text_field($_GET['term'] ?? '');
+    $term  = sanitize_text_field($_GET['term'] ?? '');
     $guias = relatacerj_lista_guias();
 
-    $resultados = array_filter($guias, function ($guia) use ($term) {
-        return stripos($guia, $term) !== false;
-    });
-
+    $resultados = array_filter($guias, fn($g) => stripos($g, $term) !== false);
     wp_send_json(array_values($resultados));
 }
 
-// Busca a lista de participantes em data/participantes.csv
-   require_once plugin_dir_path(__FILE__) . 'participantes.php';
-
-/**
- * AJAX para buscar participantes (autocomplete)
- */
+// ===== AUTOCOMPLETE PARTICIPANTES =====
 add_action('wp_ajax_relatacerj_buscar_participantes', 'relatacerj_buscar_participantes');
 add_action('wp_ajax_nopriv_relatacerj_buscar_participantes', 'relatacerj_buscar_participantes');
 
 function relatacerj_buscar_participantes() {
-    $term = sanitize_text_field($_GET['term'] ?? '');
-    $participantes = relatacerj_lista_participantes();
+    $term  = sanitize_text_field($_GET['term'] ?? '');
+    $lista = relatacerj_lista_participantes();
 
-    $resultados = array_filter($participantes, function ($participante) use ($term) {
-        return stripos($participante, $term) !== false;
-    });
-
+    $resultados = array_filter($lista, fn($p) => stripos($p, $term) !== false);
     wp_send_json(array_values($resultados));
 }
 
-/**
- * Normaliza datas para formato brasileiro
- */
-function relatacerj_normalizar_data($data) {
-    if (empty($data)) return '';
+// ===== FUNÇÃO ÚNICA DE SIMILARIDADE =====
+function relatacerj_verificar_similaridade_participantes(array $digitados) {
 
+    $oficiais = relatacerj_lista_participantes();
+    $avisos   = [];
+
+    foreach ($digitados as $d) {
+        foreach ($oficiais as $o) {
+
+            $a = mb_strtolower($d);
+            $b = mb_strtolower($o);
+
+            similar_text($a, $b, $pct);
+
+            if ($pct >= 60 && $d !== $o) {
+                $avisos[] = [
+                    'digitado' => $d,
+                    'oficial'  => $o,
+                    'score'    => round($pct)
+                ];
+            }
+        }
+    }
+
+    return $avisos;
+}
+
+// ===== AJAX: VERIFICAÇÃO DE SIMILARIDADE (ÚNICO) =====
+add_action('wp_ajax_relatacerj_verificar_similaridade', 'relatacerj_ajax_verificar_similaridade');
+add_action('wp_ajax_nopriv_relatacerj_verificar_similaridade', 'relatacerj_ajax_verificar_similaridade');
+
+function relatacerj_ajax_verificar_similaridade() {
+
+    $nome = sanitize_text_field($_GET['nome'] ?? '');
+    if ($nome === '') {
+        wp_send_json([]);
+    }
+
+    $avisos = relatacerj_verificar_similaridade_participantes([$nome]);
+    wp_send_json($avisos);
+}
+
+// ===== NORMALIZAÇÕES =====
+function relatacerj_normalizar_data($data) {
     $dt = DateTime::createFromFormat('Y-m-d', $data);
     return $dt ? $dt->format('d/m/Y') : '';
 }
 
-/**
- * Normaliza hora para formato H:i
- */
 function relatacerj_normalizar_hora($hora) {
-    if (empty($hora)) return '';
-
     $dt = DateTime::createFromFormat('H:i', $hora);
     return $dt ? $dt->format('H:i') : '';
 }
 
-/**
- * Processa o formulário e salva no CSV
- */
+// ===== PROCESSA FORMULÁRIO =====
 add_action('init', 'relatacerj_processar_formulario');
 
 function relatacerj_processar_formulario() {
 
     if (
-        !isset($_POST['relatacerj_submit']) ||
-        !isset($_POST['relatacerj_nonce']) ||
+        !isset($_POST['relatacerj_submit'], $_POST['relatacerj_nonce']) ||
         !wp_verify_nonce($_POST['relatacerj_nonce'], 'relatacerj_salvar')
-    ) {
-        return;
-    }
-    
-    // 2. Lista de campos obrigatórios
-    $campos_obrigatorios = [
-        'excursao',
-        'guias',
-        'local',
-        'categoria',
-        'data_inicio',
-        'hora_inicio',
-        'hora_fim',
-        'condicoes_climaticas',
-        'participantes',
-        'relato',
-        'preenchido_por',
-    ];
+    ) return;
 
-    // PROCESSA os guias
-    $guias_array = $_POST['guias'] ?? [];
-    $guias_array = array_map('sanitize_text_field', $guias_array);
-    $guias_array = array_filter($guias_array);
+    $erros = [];
 
-    // VALIDA cada guia
+    // ---- GUIAS ----
+    $guias = array_filter(array_map(
+        'sanitize_text_field',
+        $_POST['guias'] ?? []
+    ));
+
     $guias_validos = relatacerj_lista_guias();
-    $guias_array = array_filter($guias_array, function($guia) use ($guias_validos) {
-        return in_array($guia, $guias_validos, true);
-    });
+    $guias = array_values(array_filter($guias, fn($g) =>
+        in_array($g, $guias_validos, true)
+    ));
 
-    // Se nenhum guia válido, aborta
-    if (empty($guias_array)) {
-        return;
+    if (empty($guias)) return;
+
+    // ---- PARTICIPANTES (LISTA ABERTA) ----
+    setlocale(LC_COLLATE, 'pt_BR.UTF-8');
+
+    $participantes_array = array_unique(array_filter(array_map(
+        'sanitize_text_field',
+        $_POST['participantes'] ?? []
+    )));
+
+    if (empty($participantes_array)) {
+        $erros[] = 'Informe ao menos um participante.';
     }
 
-$erros = [];
+    // ⚠️ aqui NÃO bloqueia — frontend já avisou
+    $avisos = relatacerj_verificar_similaridade_participantes($participantes_array);
 
-// Processa os PARTICIPANTES
-setlocale(LC_COLLATE, 'pt_BR.UTF-8', 'pt_BR', 'Portuguese_Brazil');
+    sort($participantes_array, SORT_LOCALE_STRING);
+    $participantes = implode(', ', $participantes_array);
 
-$participantes_array = $_POST['participantes'] ?? [];
-
-// Garante que é array
-if (!is_array($participantes_array)) {
-    $participantes_array = [];
-}
-
-// Sanitiza e remove vazios
-$participantes_array = array_map('sanitize_text_field', $participantes_array);
-$participantes_array = array_filter($participantes_array);
-
-// Valida contra lista fechada
-$lista_valida = relatacerj_lista_participantes();
-$participantes_array = array_filter(
-    $participantes_array,
-    fn ($p) => in_array($p, $lista_valida, true)
-);
-
-// Remove duplicados
-$participantes_array = array_unique($participantes_array);
-
-// Validação final
-if (empty($participantes_array)) {
-    $erros[] = 'Informe ao menos um participante.';
-}
-
-// Ordena alfabeticamente (pt-BR)
-sort($participantes_array, SORT_LOCALE_STRING);
-
-// String final para CSV
-$participantes = implode(', ', $participantes_array);
-
-
-// Garantindo que os campos obrigatórios sejam de fato obrigatórios
-foreach ($campos_obrigatorios as $campo) {
-
-    if ($campo === 'guias') {
-        if (empty($guias_array)) {
-            $erros[] = 'Informe pelo menos um guia responsável.';
-        }
-        continue;
-    }
-
-    if ($campo === 'participantes') {
-        if (empty($participantes_array)) {
-            $erros[] = 'Informe ao menos um participante.';
-        }
-        continue;
-    }
-
-    if (empty($_POST[$campo])) {
-        $erros[] = "O campo {$campo} é obrigatório.";
-    }
-}
-
-
-    $guias = implode(', ', $guias_array);
-
-    // Monta o array de dados
+    // ---- DADOS ----
     $dados = [
         'excursao'             => sanitize_text_field($_POST['excursao'] ?? ''),
-        'guia'                 => $guias,
+        'guia'                 => implode(', ', $guias),
         'guias_auxiliares'     => sanitize_text_field($_POST['guias_auxiliares'] ?? ''),
         'local'                => sanitize_text_field($_POST['local'] ?? ''),
         'categoria'            => sanitize_text_field($_POST['categoria'] ?? ''),
@@ -189,17 +144,14 @@ foreach ($campos_obrigatorios as $campo) {
         'timestamp'            => current_time('Y-m-d H:i:s'),
     ];
 
-    // Grava no CSV
-    $upload_dir = wp_upload_dir();
-    $csv_path = $upload_dir['basedir'] . '/relatos_excursao.csv';
+    // ---- CSV ----
+    $dir = wp_upload_dir()['basedir'];
+    $csv = $dir . '/relatos_excursao.csv';
 
-    $novo = !file_exists($csv_path);
-    $fp = fopen($csv_path, 'a');
+    $novo = !file_exists($csv);
+    $fp = fopen($csv, 'a');
 
-    if ($novo) {
-        fputcsv($fp, array_keys($dados));
-    }
-
+    if ($novo) fputcsv($fp, array_keys($dados));
     fputcsv($fp, array_values($dados));
     fclose($fp);
 }

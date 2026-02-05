@@ -1,12 +1,15 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+    if (typeof jQuery === 'undefined' || !jQuery.ui) {
+        console.error('jQuery ou jQuery UI não carregado');
+        return;
+    }
+
     /* ===== GUIAS ===== */
     const guiasWrapper = document.getElementById('relatacerj-guias-wrapper');
     const addGuiaBtn   = document.getElementById('relatacerj-add-guia');
 
     function initGuiasAutocomplete(input) {
-        if (typeof jQuery === 'undefined' || !jQuery.ui) return;
-
         jQuery(input).autocomplete({
             minLength: 2,
             appendTo: input.parentElement,
@@ -41,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const addPartBtn  = document.getElementById('relatacerj-add-participante');
 
     function initParticipantesAutocomplete(input) {
-        if (typeof jQuery === 'undefined' || !jQuery.ui) return;
 
         jQuery(input).autocomplete({
             minLength: 2,
@@ -52,6 +54,36 @@ document.addEventListener('DOMContentLoaded', function () {
                     term: request.term
                 }, response);
             }
+        });
+
+        // ===== AVISO DE SIMILARIDADE =====
+        input.addEventListener('blur', function () {
+
+            const nome = input.value.trim();
+            if (!nome) return;
+
+            jQuery.getJSON(relatacerj_ajax_object.ajax_url, {
+                action: 'relatacerj_verificar_similaridade',
+                nome: nome
+            }, function (avisos) {
+
+                if (!Array.isArray(avisos) || avisos.length === 0) return;
+
+                // monta mensagens legíveis
+                const mensagens = avisos.map(a =>
+                    `⚠️ Tem certeza de que "${a.digitado}" e "${a.oficial}" não são a mesma pessoa?`
+                );
+
+                alert(
+                    mensagens.join('\n\n') +
+                    '\n\nSe os nomes se referem à mesma pessoa, selecione o nome completo na lista ao digitar.'
+                );
+            });
+        });
+
+        // dispara o aviso também ao selecionar no autocomplete
+        jQuery(input).on('autocompleteselect', function () {
+            input.blur();
         });
     }
 
@@ -73,5 +105,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 });
-
 
